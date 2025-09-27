@@ -6,7 +6,15 @@ export async function GET(request: NextRequest) {
     const isVercel = process.env.VERCEL === '1';
     
     // Basic health check
-    const healthData = {
+    const healthData: {
+      status: string;
+      timestamp: string;
+      environment: string;
+      platform: string;
+      version: string;
+      uptime: number;
+      database?: string;
+    } = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',

@@ -20,7 +20,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     mobile: '',
     company: '',
     designation: '',
-    food_choice: ''
+    food_choice: 'Veg' as 'Veg' | 'Non-Veg'
   });
 
   // Student form state
@@ -31,7 +31,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     college: '',
     education_level: 'UG' as 'UG' | 'PG',
     year_of_study: '',
-    food_choice: ''
+    food_choice: 'Veg' as 'Veg' | 'Non-Veg'
   });
 
   const handleProfessionalSubmit = async (e: React.FormEvent) => {
@@ -58,7 +58,8 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
       const attendeeData: ProfessionalAttendee = {
         ...professionalForm,
-        user_type: 'professional'
+        user_type: 'professional',
+        consent_notifications: true
       };
 
       const { error } = await attendees.createAttendee(attendeeData);
@@ -100,7 +101,8 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
       const attendeeData: StudentAttendee = {
         ...studentForm,
-        user_type: 'student'
+        user_type: 'student',
+        consent_notifications: true
       };
 
       const { error } = await attendees.createAttendee(attendeeData);
@@ -255,14 +257,12 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
               <select
                 required
                 value={professionalForm.food_choice}
-                onChange={(e) => setProfessionalForm({...professionalForm, food_choice: e.target.value})}
+                onChange={(e) => setProfessionalForm({...professionalForm, food_choice: e.target.value as 'Veg' | 'Non-Veg'})}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
               >
                 <option value="">Select food preference</option>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="non-vegetarian">Non-Vegetarian</option>
-                <option value="vegan">Vegan</option>
-                <option value="jain">Jain</option>
+                <option value="Veg">Vegetarian</option>
+                <option value="Non-Veg">Non-Vegetarian</option>
               </select>
             </div>
           </div>
@@ -373,14 +373,12 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
               <select
                 required
                 value={studentForm.food_choice}
-                onChange={(e) => setStudentForm({...studentForm, food_choice: e.target.value})}
+                onChange={(e) => setStudentForm({...studentForm, food_choice: e.target.value as 'Veg' | 'Non-Veg'})}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-white"
               >
                 <option value="">Select food preference</option>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="non-vegetarian">Non-Vegetarian</option>
-                <option value="vegan">Vegan</option>
-                <option value="jain">Jain</option>
+                <option value="Veg">Vegetarian</option>
+                <option value="Non-Veg">Non-Vegetarian</option>
               </select>
             </div>
           </div>

@@ -14,14 +14,29 @@ export interface RecommendationEngine {
   // Get AI-based session recommendations
   getRecommendations(profile: AttendeeProfile, allSessions: EventSession[]): EventSession[];
   
+  // Get reasons why a session is recommended
+  getRecommendationReasons(session: EventSession, profile: AttendeeProfile): string[];
+  
+  // Calculate session relevance score
+  calculateSessionScore(session: EventSession, profile: AttendeeProfile): number;
+  
   // Check for session conflicts
-  checkConflicts(selectedSessions: EventSession[]): { hasConflicts: boolean; conflicts: string[] };
+  checkConflicts(selectedSessions: EventSession[]): { hasConflicts: boolean; conflicts: string[]; conflictDetails: any[] };
+  
+  // Get conflict type
+  getConflictType(start1: Date, end1: Date, start2: Date, end2: Date): string;
+  
+  // Get conflict severity
+  getConflictSeverity(overlapMinutes: number, conflictType: string): 'low' | 'medium' | 'high';
+  
+  // Check for location conflicts
+  checkLocationConflicts(sessions: EventSession[]): { conflicts: string[]; details: any[] };
   
   // Get personalized agenda suggestions
   getPersonalizedAgenda(profile: AttendeeProfile, allSessions: EventSession[]): EventSession[];
 }
 
-export const aiRecommendations: RecommendationEngine = {
+const aiRecommendations: RecommendationEngine = {
   // Get AI-based session recommendations
   getRecommendations(profile: AttendeeProfile, allSessions: EventSession[]): EventSession[] {
     const recommendations: EventSession[] = [];
@@ -338,3 +353,5 @@ export const aiRecommendations: RecommendationEngine = {
     return agenda.slice(0, 8); // Limit to 8 sessions for a manageable agenda
   }
 };
+
+export { aiRecommendations };

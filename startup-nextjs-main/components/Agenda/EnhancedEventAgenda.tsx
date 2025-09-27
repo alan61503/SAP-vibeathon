@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { agenda, EventSession, PersonalizedAgenda } from '@/lib/agenda';
-import { aiRecommendations, AttendeeProfile } from '@/lib/ai-recommendations';
+import { aiRecommendations, AttendeeProfile, RecommendationEngine } from '@/lib/ai-recommendations';
 import { calendarService } from '@/lib/calendar';
 import AgendaTimeline from './AgendaTimeline';
 
@@ -14,7 +14,7 @@ interface EnhancedEventAgendaProps {
 export default function EnhancedEventAgenda({ attendeeId, attendeeProfile }: EnhancedEventAgendaProps) {
   const [sessions, setSessions] = useState<EventSession[]>([]);
   const [personalizedAgenda, setPersonalizedAgenda] = useState<PersonalizedAgenda[]>([]);
-  const [aiRecommendations, setAiRecommendations] = useState<EventSession[]>([]);
+  const [aiRecommendationsList, setAiRecommendations] = useState<EventSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -90,9 +90,9 @@ export default function EnhancedEventAgenda({ attendeeId, attendeeProfile }: Enh
 
   const checkForConflicts = () => {
     const selectedSessions = getSelectedSessions();
-    const { hasConflicts, conflicts } = aiRecommendations.checkConflicts(selectedSessions);
+    const { hasConflicts, conflicts, conflictDetails } = aiRecommendations.checkConflicts(selectedSessions);
     setShowConflicts(hasConflicts);
-    return { hasConflicts, conflicts };
+    return { hasConflicts, conflicts, conflictDetails };
   };
 
   const addToCalendar = async (session: EventSession, provider: 'google' | 'outlook' | 'ics') => {
@@ -145,7 +145,7 @@ export default function EnhancedEventAgenda({ attendeeId, attendeeProfile }: Enh
       </div>
 
       {/* AI Recommendations */}
-      {aiRecommendations.length > 0 && (
+      {aiRecommendationsList.length > 0 && (
         <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -161,7 +161,7 @@ export default function EnhancedEventAgenda({ attendeeId, attendeeProfile }: Enh
           
           {showRecommendations && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {aiRecommendations.map((session: any) => (
+              {aiRecommendationsList.map((session: any) => (
                 <div key={session.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-200 dark:border-blue-800 relative">
                   <div className="absolute top-2 right-2">
                     <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 text-xs px-2 py-1 rounded-full">
