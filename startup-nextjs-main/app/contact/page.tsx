@@ -14,10 +14,10 @@ const ContactPage = () => {
     <>
       <Breadcrumb
         pageName="Contact Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        description="We'd love to hear from you! For questions, support, or partnership opportunities, please reach out using the form below or call us at +91 9544799865. Our team is here to help students and professionals connect, collaborate, and succeed."
       />
 
-      <Contact />
+      <Contact phoneNumber={"+91 9544799865"} />
     </>
   );
 };
