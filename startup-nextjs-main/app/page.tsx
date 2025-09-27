@@ -19,6 +19,7 @@ export default function Home() {
     <>
       <ScrollUp />
       <Hero />
+      <Features />
       
       {/* Registration CTA Section */}
       <section className="py-16 bg-primary/5 dark:bg-primary/10">
@@ -47,8 +48,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <Features />
       <Brands />
       <AboutSectionOne />
       <AboutSectionTwo />

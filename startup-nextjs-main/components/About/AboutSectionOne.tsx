@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SectionTitle from "../Common/SectionTitle";
 
 const checkIcon = (
@@ -24,8 +23,8 @@ const AboutSectionOne = () => {
           <div className="-mx-4 flex flex-wrap items-center">
             <div className="w-full px-4 lg:w-1/2">
               <SectionTitle
-                title="Crafted for Startup, SaaS and Business Sites."
-                paragraph="The main ‘thrust’ is to focus on educating attendees on how to best protect highly vulnerable business applications with interactive panel discussions and roundtables."
+                title="Crafted for Students, Professionals, and Innovators"
+                paragraph="Focused on delivering hands-on learning, interactive workshops, and expert talks. Dive into tech, business, and innovation sessions designed to expand your skills and network."
                 mb="44px"
               />
 
@@ -35,20 +34,19 @@ const AboutSectionOne = () => {
               >
                 <div className="mx-[-12px] flex flex-wrap">
                   <div className="w-full px-3 sm:w-1/2 lg:w-full xl:w-1/2">
-                    <List text="Premium quality" />
-                    <List text="Tailwind CSS" />
-                    <List text="Use for lifetime" />
+                    <List text="Premium Experience" />
+                    <List text="Built with modern web tech for a fast, responsive, and intuitive interface" />
+                    <List text="Lifetime access to resources and event recordings" />
                   </div>
 
                   <div className="w-full px-3 sm:w-1/2 lg:w-full xl:w-1/2">
-                    <List text="Next.js" />
-                    <List text="Rich documentation" />
-                    <List text="Developer friendly" />
+                    <List text="Developer & Participant Friendly" />
+                    <List text="Easy to navigate agenda and registration flows" />
+                    <List text="AI-powered recommendations for personalized session planning" />
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
