@@ -4,10 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { oauth } from '@/lib/oauth';
 import { attendees } from '@/lib/attendees';
+import ProfessionalRegistrationForm from '@/components/Registration/ProfessionalRegistrationForm';
+import StudentRegistrationForm from '@/components/Registration/StudentRegistrationForm';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [attendee, setAttendee] = useState<any>(null);
+  const [userType, setUserType] = useState<'professional' | 'student' | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -23,6 +26,10 @@ export default function Dashboard() {
         }
 
         setUser(user);
+
+        // Get user type from localStorage
+        const storedUserType = localStorage.getItem('userType') as 'professional' | 'student' | null;
+        setUserType(storedUserType);
 
         // Check if user is already registered as an attendee
         const { data: attendeeData, error: attendeeError } = await attendees.getAttendeeByEmail(user.email);
@@ -42,7 +49,12 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await oauth.signOut();
+    localStorage.removeItem('userType');
     router.push('/registration');
+  };
+
+  const handleRegistrationSuccess = (newAttendee: any) => {
+    setAttendee(newAttendee);
   };
 
   if (loading) {
@@ -70,6 +82,48 @@ export default function Dashboard() {
           >
             Go to Registration
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If user hasn't selected a type yet, redirect to user type selection
+  if (!userType) {
+    router.push('/user-type-selection');
+    return null;
+  }
+
+  // If user is not registered, show registration form
+  if (!attendee) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Complete Your Registration
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Hello, {user?.user_metadata?.full_name || user?.email}! Please complete your {userType} registration.
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+
+          {/* Registration Form */}
+          {userType === 'professional' ? (
+            <ProfessionalRegistrationForm onSuccess={handleRegistrationSuccess} />
+          ) : (
+            <StudentRegistrationForm onSuccess={handleRegistrationSuccess} />
+          )}
         </div>
       </div>
     );

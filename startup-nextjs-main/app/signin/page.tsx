@@ -24,8 +24,8 @@ export default function SigninPage() {
       if (error) {
         setError(error.message || "Failed to sign in. Please check your credentials.");
       } else if (data.user) {
-        // Redirect to dashboard or home page
-        router.push("/dashboard");
+        // Redirect to user type selection
+        router.push("/user-type-selection");
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
