@@ -15,7 +15,7 @@ const AboutPage = () => {
     <>
       <Breadcrumb
         pageName="About Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        description="Welcome to a vibrant hub for students and professionals! Our platform is dedicated to empowering you with hands-on learning, networking opportunities, and career growth. Whether you are a student eager to gain real-world skills or a professional looking to upskill, collaborate, or mentor, you'll find interactive workshops, expert talks, and innovative resources tailored for your journey. Join us to connect, learn, and thrive in a community that values curiosity, ambition, and lifelong learning."
       />
       <AboutSectionOne />
       <AboutSectionTwo />
