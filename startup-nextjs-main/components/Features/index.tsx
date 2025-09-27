@@ -8,8 +8,8 @@ const Features = () => {
       <section id="features" className="py-16 md:py-20 lg:py-28">
         <div className="container">
           <SectionTitle
-            title="Main Features"
-            paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+            title="6 Things About Vibeathon"
+            paragraph="Discover what makes SAP Vibeathon an exceptional learning and networking experience for students and professionals."
             center
           />
 

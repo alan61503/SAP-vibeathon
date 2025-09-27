@@ -1,0 +1,225 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { agenda, EventSession, PersonalizedAgenda } from '@/lib/agenda';
+
+interface EventAgendaProps {
+  attendeeId: string;
+}
+
+export default function EventAgenda({ attendeeId }: EventAgendaProps) {
+  const [sessions, setSessions] = useState<EventSession[]>([]);
+  const [personalizedAgenda, setPersonalizedAgenda] = useState<PersonalizedAgenda[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  useEffect(() => {
+    fetchSessions();
+    fetchPersonalizedAgenda();
+  }, [attendeeId]);
+
+  const fetchSessions = async () => {
+    try {
+      const { data, error } = await agenda.getAllSessions();
+      if (error) {
+        setError(error.message);
+      } else {
+        setSessions(data || []);
+      }
+    } catch (err) {
+      setError('Failed to fetch sessions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPersonalizedAgenda = async () => {
+    try {
+      const { data, error } = await agenda.getPersonalizedAgenda(attendeeId);
+      if (error) {
+        console.error('Failed to fetch personalized agenda:', error);
+      } else {
+        setPersonalizedAgenda(data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching personalized agenda:', err);
+    }
+  };
+
+  const toggleSessionInAgenda = async (sessionId: string) => {
+    try {
+      const { isInAgenda } = await agenda.isInAgenda(attendeeId, sessionId);
+      
+      if (isInAgenda) {
+        await agenda.removeFromAgenda(attendeeId, sessionId);
+      } else {
+        await agenda.addToAgenda(attendeeId, sessionId);
+      }
+      
+      fetchPersonalizedAgenda();
+    } catch (err) {
+      console.error('Error toggling session:', err);
+    }
+  };
+
+  const isSessionInAgenda = (sessionId: string) => {
+    return personalizedAgenda.some(item => item.session_id === sessionId);
+  };
+
+  const filteredSessions = selectedCategory === 'all' 
+    ? sessions 
+    : sessions.filter(session => session.category === selectedCategory);
+
+  const categories = [
+    { value: 'all', label: 'All Sessions' },
+    { value: 'keynote', label: 'Keynotes' },
+    { value: 'workshop', label: 'Workshops' },
+    { value: 'panel', label: 'Panels' },
+    { value: 'networking', label: 'Networking' },
+    { value: 'break', label: 'Breaks' }
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <p className="text-red-700 dark:text-red-300">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          Event Agenda
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Build your personalized agenda by selecting sessions you want to attend.
+        </p>
+      </div>
+
+      {/* Category Filter */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category.value}
+              onClick={() => setSelectedCategory(category.value)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedCategory === category.value
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sessions Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredSessions.map((session) => (
+          <div
+            key={session.id}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  {session.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  {session.speaker}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  {new Date(session.start_time).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })} - {new Date(session.end_time).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </p>
+              </div>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                session.category === 'keynote' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
+                session.category === 'workshop' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                session.category === 'panel' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400' :
+                session.category === 'networking' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+              }`}>
+                {session.category}
+              </span>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              {session.description}
+            </p>
+
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm text-gray-500 dark:text-gray-500">
+                📍 {session.location}
+              </div>
+              {session.track && (
+                <div className="text-sm text-gray-500 dark:text-gray-500">
+                  🎯 {session.track}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => toggleSessionInAgenda(session.id)}
+              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                isSessionInAgenda(session.id)
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-primary hover:bg-primary/90 text-white'
+              }`}
+            >
+              {isSessionInAgenda(session.id) ? '✓ Added to Agenda' : '+ Add to Agenda'}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Personalized Agenda Summary */}
+      {personalizedAgenda.length > 0 && (
+        <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-4">
+            Your Personalized Agenda ({personalizedAgenda.length} sessions)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {personalizedAgenda.map((item) => (
+              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  {item.session?.title}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {item.session?.speaker} • {item.session?.location}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500">
+                  {new Date(item.session?.start_time || '').toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })} - {new Date(item.session?.end_time || '').toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
