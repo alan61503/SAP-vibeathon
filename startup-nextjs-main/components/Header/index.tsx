@@ -59,16 +59,16 @@ const Header = () => {
                 <Image
                   src="/images/logo/logo-2.svg"
                   alt="logo"
-                  width={140}
-                  height={30}
-                  className="w-full dark:hidden"
+                  width={90}
+                  height={24}
+                  className="w-auto dark:hidden"
                 />
                 <Image
                   src="/images/logo/logo.svg"
                   alt="logo"
-                  width={140}
-                  height={30}
-                  className="hidden w-full dark:block"
+                  width={90}
+                  height={24}
+                  className="hidden w-auto dark:block"
                 />
                 <span className="ml-3 text-2xl font-bold text-primary">VIBE</span>
               </Link>

@@ -1,4 +1,4 @@
-import NewsLatterBox from "./NewsLatterBox";
+// ...existing code...
 
 interface ContactProps {
   phoneNumber?: string;
@@ -6,22 +6,21 @@ interface ContactProps {
 
 const Contact = ({ phoneNumber = "+91 9544799865" }: ContactProps) => {
   return (
-    <section id="contact" className="overflow-hidden py-16 md:py-20 lg:py-28">
-      <div className="container">
-        <div className="-mx-4 flex flex-wrap">
-          <div className="w-full px-4 lg:w-7/12 xl:w-8/12">
+  <section id="contact" className="overflow-hidden py-24 md:py-32 lg:py-40">
+  <div className="container mx-auto px-6">
+  <div className="-mx-4 flex flex-wrap gap-y-12 gap-x-8 justify-center">
+          <div className="w-full px-4 lg:w-7/12 xl:w-8/12 flex flex-col justify-center items-center">
             <div
-              className="wow fadeInUp shadow-three dark:bg-gray-dark mb-12 rounded-sm bg-white px-8 py-11 sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]"
-              data-wow-delay=".15s
-              "
+              className="wow fadeInUp shadow-three dark:bg-gray-dark mb-16 rounded-lg bg-white px-12 py-16 sm:p-[70px] lg:mb-10 lg:px-12 xl:p-[70px]"
+              data-wow-delay=".15s"
             >
-              <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl lg:text-2xl xl:text-3xl">
+              <h2 className="mb-6 text-3xl font-bold text-black dark:text-white sm:text-4xl lg:text-3xl xl:text-4xl text-center">
                 Need Help? Open a Ticket
               </h2>
-              <p className="mb-2 text-base font-medium text-body-color">
+              <p className="mb-4 text-lg font-medium text-body-color text-center">
                 Our support team will get back to you ASAP via email or phone.
               </p>
-              <p className="mb-8 text-base font-medium text-body-color">
+              <p className="mb-10 text-lg font-medium text-body-color text-center">
                 <span className="font-semibold text-primary">Contact Number:</span> <a href={`tel:${phoneNumber}`} className="hover:underline">{phoneNumber}</a>
               </p>
               <form>
@@ -81,9 +80,7 @@ const Contact = ({ phoneNumber = "+91 9544799865" }: ContactProps) => {
               </form>
             </div>
           </div>
-          <div className="w-full px-4 lg:w-5/12 xl:w-4/12">
-            <NewsLatterBox />
-          </div>
+          {/* Additional content or layout can go here if needed */}
         </div>
       </div>
     </section>
