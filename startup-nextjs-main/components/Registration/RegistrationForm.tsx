@@ -1,17 +1,43 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { attendees, ProfessionalAttendee, StudentAttendee } from '@/lib/attendees';
+import { EmailService } from '@/lib/email-service';
 
 interface RegistrationFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (attendeeData?: any) => void;
+  userType?: 'professional' | 'student';
+  prefilledData?: {
+    name: string;
+    email: string;
+    userType: string;
+  };
 }
 
-export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
-  const [userType, setUserType] = useState<'professional' | 'student'>('professional');
+export default function RegistrationForm({ onSuccess, userType: propUserType, prefilledData }: RegistrationFormProps) {
+  const [userType, setUserType] = useState<'professional' | 'student'>(propUserType || 'professional');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Pre-fill form data when prefilledData is provided
+  useEffect(() => {
+    if (prefilledData) {
+      if (prefilledData.userType === 'professional') {
+        setProfessionalForm(prev => ({
+          ...prev,
+          name: prefilledData.name,
+          email: prefilledData.email
+        }));
+      } else if (prefilledData.userType === 'student') {
+        setStudentForm(prev => ({
+          ...prev,
+          name: prefilledData.name,
+          email: prefilledData.email
+        }));
+      }
+    }
+  }, [prefilledData]);
 
   // Professional form state
   const [professionalForm, setProfessionalForm] = useState({
@@ -62,13 +88,46 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         consent_notifications: true
       };
 
-      const { error } = await attendees.createAttendee(attendeeData);
+      const { data, error } = await attendees.createAttendee(attendeeData);
       
       if (error) {
         setError(error.message);
       } else {
         setSuccess(true);
-        if (onSuccess) onSuccess();
+        
+        // Generate QR code for the new attendee
+        if (data && data[0]) {
+          try {
+            const { data: qrResult } = await attendees.generateQRCode(data[0].id);
+            if (qrResult) {
+              // Store QR code data in localStorage for display
+              localStorage.setItem('qrCodeData', JSON.stringify(qrResult));
+              localStorage.setItem('qrCodeImage', qrResult.qrCodeDataURL);
+              
+              // Send confirmation email with QR code
+              const emailData = {
+                to: data[0].email,
+                name: data[0].name,
+                userType: data[0].user_type,
+                qrCodeDataURL: qrResult.qrCodeDataURL,
+                eventDetails: {
+                  name: 'SAP Vibeathon 2024',
+                  date: 'December 15, 2024',
+                  time: '9:00 AM - 6:00 PM',
+                  location: 'SAP Innovation Center, Bangalore',
+                  description: 'Join us for an exciting day of innovation, networking, and learning with industry experts and fellow participants.'
+                }
+              };
+              
+              // Send email (this will be logged in console for now)
+              await EmailService.sendConfirmationEmail(emailData);
+            }
+          } catch (qrError) {
+            console.error('Error generating QR code:', qrError);
+          }
+        }
+        
+        if (onSuccess) onSuccess(data[0]);
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -105,13 +164,46 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         consent_notifications: true
       };
 
-      const { error } = await attendees.createAttendee(attendeeData);
+      const { data, error } = await attendees.createAttendee(attendeeData);
       
       if (error) {
         setError(error.message);
       } else {
         setSuccess(true);
-        if (onSuccess) onSuccess();
+        
+        // Generate QR code for the new attendee
+        if (data && data[0]) {
+          try {
+            const { data: qrResult } = await attendees.generateQRCode(data[0].id);
+            if (qrResult) {
+              // Store QR code data in localStorage for display
+              localStorage.setItem('qrCodeData', JSON.stringify(qrResult));
+              localStorage.setItem('qrCodeImage', qrResult.qrCodeDataURL);
+              
+              // Send confirmation email with QR code
+              const emailData = {
+                to: data[0].email,
+                name: data[0].name,
+                userType: data[0].user_type,
+                qrCodeDataURL: qrResult.qrCodeDataURL,
+                eventDetails: {
+                  name: 'SAP Vibeathon 2024',
+                  date: 'December 15, 2024',
+                  time: '9:00 AM - 6:00 PM',
+                  location: 'SAP Innovation Center, Bangalore',
+                  description: 'Join us for an exciting day of innovation, networking, and learning with industry experts and fellow participants.'
+                }
+              };
+              
+              // Send email (this will be logged in console for now)
+              await EmailService.sendConfirmationEmail(emailData);
+            }
+          } catch (qrError) {
+            console.error('Error generating QR code:', qrError);
+          }
+        }
+        
+        if (onSuccess) onSuccess(data[0]);
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -140,34 +232,36 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* User Type Selection */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-center mb-6">VIBE Event Registration</h2>
-        <div className="flex space-x-4 justify-center">
-          <button
-            type="button"
-            onClick={() => setUserType('professional')}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              userType === 'professional'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            Professional
-          </button>
-          <button
-            type="button"
-            onClick={() => setUserType('student')}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              userType === 'student'
-                ? 'bg-primary text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            Student
-          </button>
+      {/* User Type Selection - Only show if not provided as prop */}
+      {!propUserType && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-center mb-6">VIBE Event Registration</h2>
+          <div className="flex space-x-4 justify-center">
+            <button
+              type="button"
+              onClick={() => setUserType('professional')}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                userType === 'professional'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              Professional
+            </button>
+            <button
+              type="button"
+              onClick={() => setUserType('student')}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                userType === 'student'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              Student
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Error Message */}
       {error && (

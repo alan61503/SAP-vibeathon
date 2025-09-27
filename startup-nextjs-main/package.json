@@ -13,11 +13,13 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
+    "@types/qrcode": "^1.5.5",
     "critters": "^0.0.23",
     "eslint": "8.33.0",
     "eslint-config-next": "13.1.6",
     "next": "^15.5.4",
     "next-themes": "^0.2.1",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-modal-video": "^2.0.0"

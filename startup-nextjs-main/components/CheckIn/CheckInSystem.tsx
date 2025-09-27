@@ -2,20 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { attendees } from '@/lib/attendees';
+import QRCodeScanner from './QRCodeScanner';
 
 interface CheckInSystemProps {
-  attendeeId: string;
+  attendeeId?: string;
+  isStaffView?: boolean;
 }
 
-export default function CheckInSystem({ attendeeId }: CheckInSystemProps) {
+export default function CheckInSystem({ attendeeId, isStaffView = false }: CheckInSystemProps) {
   const [attendee, setAttendee] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
-    fetchAttendeeDetails();
+    if (attendeeId) {
+      fetchAttendeeDetails();
+    } else {
+      setLoading(false);
+    }
   }, [attendeeId]);
 
   const fetchAttendeeDetails = async () => {
@@ -53,6 +60,17 @@ export default function CheckInSystem({ attendeeId }: CheckInSystemProps) {
     }
   };
 
+  const handleQRCheckInSuccess = (attendeeData: any) => {
+    setAttendee(attendeeData);
+    setSuccess(true);
+    setShowScanner(false);
+  };
+
+  const handleQRCheckInError = (errorMessage: string) => {
+    setError(errorMessage);
+    setShowScanner(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -70,6 +88,37 @@ export default function CheckInSystem({ attendeeId }: CheckInSystemProps) {
   }
 
   if (!attendee) {
+    if (isStaffView) {
+      return (
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Event Check-In System
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Scan QR codes or manually check in attendees
+            </p>
+          </div>
+          
+          {showScanner ? (
+            <QRCodeScanner 
+              onCheckInSuccess={handleQRCheckInSuccess}
+              onCheckInError={handleQRCheckInError}
+            />
+          ) : (
+            <div className="text-center">
+              <button
+                onClick={() => setShowScanner(true)}
+                className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                📱 Start QR Code Scanning
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { QRCodeService, QRCodeData } from './qr-code';
 
 export interface ProfessionalAttendee {
   name: string;
@@ -150,5 +151,98 @@ export const attendees = {
       },
       error: null
     };
+  },
+
+  // Generate QR code for an attendee
+  async generateQRCode(attendeeId: string): Promise<{ data: QRCodeData & { qrCodeDataURL: string }; error: any }> {
+    try {
+      const { data: attendee, error: fetchError } = await supabase
+        .from('attendees')
+        .select('*')
+        .eq('id', attendeeId)
+        .single();
+
+      if (fetchError || !attendee) {
+        return { data: null as any, error: fetchError || new Error('Attendee not found') };
+      }
+
+      const qrData = QRCodeService.generateQRData(attendee);
+      const qrCodeDataURL = await QRCodeService.generateQRCode(qrData);
+
+      // Update attendee record with QR code data
+      const { error: updateError } = await supabase
+        .from('attendees')
+        .update({
+          qr_code_data: qrData,
+          qr_code_generated_at: new Date().toISOString()
+        })
+        .eq('id', attendeeId);
+
+      if (updateError) {
+        console.error('Error updating QR code data:', updateError);
+      }
+
+      return { data: { ...qrData, qrCodeDataURL }, error: null };
+    } catch (error) {
+      return { data: null as any, error };
+    }
+  },
+
+  // Check-in attendee using QR code
+  async checkInWithQR(qrCodeData: QRCodeData): Promise<{ success: boolean; error: any }> {
+    try {
+      // Validate QR code data
+      if (!QRCodeService.validateQRCodeData(qrCodeData)) {
+        return { success: false, error: new Error('Invalid QR code data') };
+      }
+
+      // Check if attendee exists
+      const { data: attendee, error: fetchError } = await supabase
+        .from('attendees')
+        .select('*')
+        .eq('id', qrCodeData.attendeeId)
+        .single();
+
+      if (fetchError || !attendee) {
+        return { success: false, error: new Error('Attendee not found') };
+      }
+
+      // Check if already checked in
+      if (attendee.checked_in) {
+        return { success: false, error: new Error('Attendee already checked in') };
+      }
+
+      // Update check-in status
+      const { error: updateError } = await supabase
+        .from('attendees')
+        .update({
+          checked_in: true,
+          check_in_time: new Date().toISOString()
+        })
+        .eq('id', qrCodeData.attendeeId);
+
+      if (updateError) {
+        return { success: false, error: updateError };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
+
+  // Get attendee by ID
+  async getAttendeeById(attendeeId: string): Promise<{ data: any; error: any }> {
+    try {
+      const { data, error } = await supabase
+        .from('attendees')
+        .select('*')
+        .eq('id', attendeeId)
+        .single();
+
+      return { data, error };
+    } catch (error) {
+      return { data: null, error };
+    }
   }
 };

@@ -1,21 +1,52 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AuthModal from '@/components/Registration/AuthModal';
 import UserDashboard from '@/components/Registration/UserDashboard';
 import OAuthLogin from '@/components/Registration/OAuthLogin';
+import RegistrationForm from '@/components/Registration/RegistrationForm';
+import QRCodeDisplay from '@/components/Registration/QRCodeDisplay';
 import { oauth } from '@/lib/oauth';
 
-export default function RegistrationPage() {
+function RegistrationContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState<'professional' | 'student' | null>(null);
+  const [prefilledData, setPrefilledData] = useState<any>(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredAttendee, setRegisteredAttendee] = useState<any>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check for user type from URL parameter
+        const typeParam = searchParams.get('type');
+        if (typeParam && (typeParam === 'professional' || typeParam === 'student')) {
+          setUserType(typeParam);
+        }
+
+        // Check for pre-filled data from localStorage (from signup flow)
+        const storedUserType = localStorage.getItem('userType');
+        const storedEmail = localStorage.getItem('userEmail');
+        const storedName = localStorage.getItem('userName');
+        
+        if (storedUserType && storedEmail && storedName) {
+          setUserType(storedUserType as 'professional' | 'student');
+          setPrefilledData({
+            name: storedName,
+            email: storedEmail,
+            userType: storedUserType
+          });
+          // Clear localStorage after using the data
+          localStorage.removeItem('userType');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+        }
+
         const { user } = await oauth.getCurrentUser();
         if (user) {
           setCurrentUser(user);
@@ -72,6 +103,51 @@ export default function RegistrationPage() {
 
   if (currentUser) {
     return <UserDashboard attendee={currentUser} onLogout={handleLogout} />;
+  }
+
+  // If user type is selected, show the registration form
+  if (userType) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          {registrationSuccess ? (
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                Registration Complete! 🎉
+              </h1>
+              <QRCodeDisplay attendeeData={registeredAttendee} />
+              <div className="mt-8">
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                  Complete Your Registration
+                </h1>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Registering as: <span className="text-primary font-semibold capitalize">{userType}</span>
+                </p>
+              </div>
+              <RegistrationForm 
+                userType={userType} 
+                prefilledData={prefilledData}
+                onSuccess={(attendeeData) => {
+                  setRegistrationSuccess(true);
+                  setRegisteredAttendee(attendeeData);
+                }}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -184,5 +260,22 @@ export default function RegistrationPage() {
         onRegisterSuccess={handleRegisterSuccess}
       />
     </div>
+  );
+}
+
+export default function RegistrationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Loading...
+          </h2>
+        </div>
+      </div>
+    }>
+      <RegistrationContent />
+    </Suspense>
   );
 }

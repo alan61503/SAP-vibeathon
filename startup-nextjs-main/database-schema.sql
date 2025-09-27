@@ -27,6 +27,8 @@ CREATE TABLE attendees (
   -- Check-in fields
   checked_in BOOLEAN DEFAULT FALSE,
   check_in_time TIMESTAMP WITH TIME ZONE,
+  qr_code_data JSONB, -- Store QR code data as JSON
+  qr_code_generated_at TIMESTAMP WITH TIME ZONE,
   
   -- Common fields
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
