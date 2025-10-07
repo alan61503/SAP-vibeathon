@@ -84,4 +84,4 @@ MIT – Free for personal and commercial use.
 ---
 
 ## 🙌 Credits
-Created for SAP Vibeathon. If you find this project useful, please star the repository!
+Created for SAP Vibeathon. If you find this project useful, please star the repository
